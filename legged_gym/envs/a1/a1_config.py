@@ -27,10 +27,17 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 # Copyright (c) 2021 ETH Zurich, Nikita Rudin
-
+import sys
+sys.path.append("/home/g54/issac_gym")
+print(sys.path)
 from legged_gym.envs.base.legged_robot_config import LeggedRobotCfg, LeggedRobotCfgPPO
 
 class A1RoughCfg( LeggedRobotCfg ):
+    class env(LeggedRobotCfg.env):
+        num_envs = 128
+        num_actions = 16
+        num_observations = 247
+
     class init_state( LeggedRobotCfg.init_state ):
         pos = [0.0, 0.0, 0.42] # x,y,z [m]
         default_joint_angles = { # = target angles [rad] when action = 0.0
@@ -48,13 +55,19 @@ class A1RoughCfg( LeggedRobotCfg ):
             'RL_calf_joint': -1.5,    # [rad]
             'FR_calf_joint': -1.5,  # [rad]
             'RR_calf_joint': -1.5,    # [rad]
+
+            'RL_wheel_fixed':0,
+            'RR_wheel_fixed':0,
+            'FL_wheel_fixed':0,
+            'FR_wheel_fixed':0,
+
         }
 
     class control( LeggedRobotCfg.control ):
         # PD Drive parameters:
         control_type = 'P'
-        stiffness = {'joint': 20.}  # [N*m/rad]
-        damping = {'joint': 0.5}     # [N*m*s/rad]
+        stiffness = {'joint': 20.,"fixed":10}  # [N*m/rad]
+        damping = {'joint': 0.5,"fixed":5}     # [N*m*s/rad]
         # action scale: target angle = actionScale * action + defaultAngle
         action_scale = 0.25
         # decimation: Number of control action updates @ sim DT per policy DT
@@ -63,9 +76,9 @@ class A1RoughCfg( LeggedRobotCfg ):
     class asset( LeggedRobotCfg.asset ):
         file = '{LEGGED_GYM_ROOT_DIR}/resources/robots/a1/urdf/a1.urdf'
         name = "a1"
-        foot_name = "foot"
+        foot_name = "WHEEL"
         penalize_contacts_on = ["thigh", "calf"]
-        terminate_after_contacts_on = ["base"]
+        terminate_after_contacts_on = []
         self_collisions = 1 # 1 to disable, 0 to enable...bitwise filter
   
     class rewards( LeggedRobotCfg.rewards ):

@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -O3 -fPIC -std=c++11  -shared -Wl,-soname,libgmock.so -o ../lib/libgmock.so CMakeFiles/gmock.dir/src/gmock-all.cc.o  -Wl,-rpath,/home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/build/unitree_legged_real/gtest/lib ../lib/libgtest.so -lpthread 

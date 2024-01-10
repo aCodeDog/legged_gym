@@ -1,0 +1,8 @@
+prefix=/home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/install
+
+Name: z1_description
+Description: Description of z1_description
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

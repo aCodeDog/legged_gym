@@ -1,0 +1,8 @@
+prefix=/home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/.private/unitree_legged_sdk
+
+Name: unitree_legged_sdk
+Description: Description of unitree_legged_sdk
+Version: 0.0.0
+Cflags: -I/home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/src/unitree_legged_sdk/include
+Libs: -L${prefix}/lib /home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/src/unitree_legged_sdk/lib/cpp/amd64/libunitree_legged_sdk.a
+Requires: 

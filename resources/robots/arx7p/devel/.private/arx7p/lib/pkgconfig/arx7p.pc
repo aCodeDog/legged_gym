@@ -1,0 +1,8 @@
+prefix=/home/g54/issac_gym/legged_gym/resources/robots/arx7p/devel/.private/arx7p
+
+Name: arx7p
+Description: Description of arx7p
+Version: 1.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

@@ -1,0 +1,5 @@
+unitree_legged_sdk
+/home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/.private/unitree_legged_sdk/cmake.lock /home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/./cmake.lock
+/home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/.private/unitree_legged_sdk/share/unitree_legged_sdk/cmake/unitree_legged_sdkConfig.cmake /home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/share/unitree_legged_sdk/cmake/unitree_legged_sdkConfig.cmake
+/home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/.private/unitree_legged_sdk/share/unitree_legged_sdk/cmake/unitree_legged_sdkConfig-version.cmake /home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/share/unitree_legged_sdk/cmake/unitree_legged_sdkConfig-version.cmake
+/home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/.private/unitree_legged_sdk/lib/pkgconfig/unitree_legged_sdk.pc /home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/lib/pkgconfig/unitree_legged_sdk.pc

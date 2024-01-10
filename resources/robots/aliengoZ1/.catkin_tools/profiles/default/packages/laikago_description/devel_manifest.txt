@@ -1,0 +1,5 @@
+robots/laikago_description
+/home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/.private/laikago_description/cmake.lock /home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/./cmake.lock
+/home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/.private/laikago_description/share/laikago_description/cmake/laikago_descriptionConfig.cmake /home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/share/laikago_description/cmake/laikago_descriptionConfig.cmake
+/home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/.private/laikago_description/share/laikago_description/cmake/laikago_descriptionConfig-version.cmake /home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/share/laikago_description/cmake/laikago_descriptionConfig-version.cmake
+/home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/.private/laikago_description/lib/pkgconfig/laikago_description.pc /home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/lib/pkgconfig/laikago_description.pc

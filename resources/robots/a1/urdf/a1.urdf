@@ -1,5 +1,29 @@
 <?xml version="1.0" ?>
 <robot name="a1_description" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+   <xacro:property name="wheel_radius" value="0.14"/>
+   <xacro:property name="wheel_width" value="0.06"/>
+   <!-- x-axis points forward, y-axis points to left, z-axis points upwards -->
+   <!-- Define the gap between the wheel and chassis along y-axis in meters -->
+  <xacro:property name="wheel_ygap" value="0.035"/>
+
+  <!-- Position the wheels along the z-axis -->
+  <xacro:property name="wheel_zoff" value="0.05"/>
+
+  <!-- Position the wheels along the x-axis -->
+  <xacro:property name="wheel_xoff" value="0.221"/>
+
+    <xacro:macro name="cylinder_inertia" params="m r h">
+      <inertial>
+        <origin xyz="0 0 0" rpy="${pi/2} 0 0" />
+        <mass value="${m}"/>
+        <inertia ixx="${(m/12) * (3*r*r + h*h)}" ixy = "0" ixz = "0" iyy="${(m/12) * (3*r*r + h*h)}" iyz = "0" izz="${(m/2) * (r*r)}"/>
+      </inertial>
+    </xacro:macro>
+
+ 
+
+
   <material name="black">
     <color rgba="0.0 0.0 0.0 1.0"/>
   </material>
@@ -574,5 +598,116 @@
       <inertia ixx="9.6e-06" ixy="0.0" ixz="0.0" iyy="9.6e-06" iyz="0.0" izz="9.6e-06"/>
     </inertial>
   </link>
-</robot>
 
+    <joint name="RL_wheel_fixed" type="revolute">
+        <origin rpy="0 0 0" xyz="0 0.035  -0.213"/>
+         <!-- <origin xyz="${x_reflect*wheel_xoff} ${y_reflect*(base_width/2+wheel_ygap)} ${-wheel_zoff}" rpy="0 0 0"/> -->
+         <!-- <origin xyz="${-wheel_xoff} ${-(base_width/2+wheel_ygap)} ${-wheel_zoff}" rpy="0 0 0"/>  -->
+        <parent link="RL_calf"/>
+        <child link="RL_WHEEL"/>
+        <axis xyz="0 1 0"/>
+        <dynamics damping="0.01" friction="0.02"/>
+        <limit effort="20" lower="-2147483647" upper="2147483647" velocity="10"/>
+    </joint>
+
+     <link name="RL_WHEEL">
+        <visual>
+          <origin xyz="0 0 0" rpy="1.5707963267949 0 0"/>
+          <geometry>
+              <cylinder radius="0.05" length="0.02"/>
+          </geometry>
+          <material name="White">
+            <color rgba="0.0 0.0 0.0 1.0"/>
+          </material>
+        </visual>
+        <collision>
+          <origin xyz="0 0 0" rpy="1.57 0 0"/>
+          <geometry>
+            <cylinder radius="0.05" length="0.02"/>
+          </geometry>
+        </collision>
+    </link>
+
+       <joint name="RR_wheel_fixed" type="revolute">
+        <origin rpy="0 0 0" xyz="0 0.035  -0.213"/>
+         <!-- <origin xyz="${-wheel_xoff} ${-(base_width/2+wheel_ygap)} ${-wheel_zoff}" rpy="0 0 0"/>   RR -> RH -->
+        <parent link="RR_calf"/>
+        <child link="RR_WHEEL"/>
+        <axis xyz="0 1 0"/>
+        <dynamics damping="0.01" friction="0.02"/>
+        <limit effort="20" lower="-2147483647" upper="2147483647" velocity="10"/>
+    </joint>
+
+     <link name="RR_WHEEL">
+        <visual>
+          <origin xyz="0 0 0" rpy="1.5707963267949 0 0"/>
+          <geometry>
+              <cylinder radius="0.05" length="0.02"/>
+          </geometry>
+          <material name="White">
+            <color rgba="0.0 0.0 0.0 1.0"/>
+          </material>
+        </visual>
+        <collision>
+          <origin xyz="0 0 0" rpy="1.57 0 0"/>
+          <geometry>
+            <cylinder radius="0.05" length="0.02"/>
+          </geometry>
+        </collision>
+    </link>
+    
+       <joint name="FR_wheel_fixed" type="revolute">
+        <origin rpy="0 0 0" xyz="0 -0.035  -0.213"/>
+         <!-- <origin xyz="${-wheel_xoff} ${-(base_width/2+wheel_ygap)} ${-wheel_zoff}" rpy="0 0 0"/>   RR -> RH -->
+        <parent link="FR_calf"/>
+        <child link="FR_WHEEL"/>
+        <axis xyz="0 1 0"/>
+        <dynamics damping="0.01" friction="0.02"/>
+        <limit effort="20" lower="-2147483647" upper="2147483647" velocity="10"/>
+    </joint>
+
+     <link name="FR_WHEEL">
+        <visual>
+          <origin xyz="0 0 0" rpy="1.5707963267949 0 0"/>
+          <geometry>
+              <cylinder radius="0.05" length="0.02"/>
+          </geometry>
+          <material name="White">
+            <color rgba="0.0 0.0 0.0 1.0"/>
+          </material>
+        </visual>
+        <collision>
+          <origin xyz="0 0 0" rpy="1.57 0 0"/>
+          <geometry>
+            <cylinder radius="0.05" length="0.02"/>
+          </geometry>
+        </collision>
+    </link>
+       <joint name="FL_wheel_fixed" type="revolute">
+        <origin rpy="0 0 0" xyz="0 0.035  -0.213"/>
+         <!-- <origin xyz="${-wheel_xoff} ${-(base_width/2+wheel_ygap)} ${-wheel_zoff}" rpy="0 0 0"/>   RR -> RH -->
+        <parent link="FL_calf"/>
+        <child link="FL_WHEEL"/>
+        <axis xyz="0 1 0"/>
+        <dynamics damping="0.01" friction="0.02"/>
+        <limit effort="20" lower="-2147483647" upper="2147483647" velocity="10"/>
+    </joint>
+<!-- RF: FR  -1 -1    RH:RR  -1 -1  LF: RL +1 -1   LH: FL  +1 -1 -->
+     <link name="FL_WHEEL">
+        <visual>
+          <origin xyz="0 0 0" rpy="1.5707963267949 0 0"/>
+          <geometry>
+              <cylinder radius="0.05" length="0.02"/>
+          </geometry>
+          <material name="White">
+            <color rgba="0.0 0.0 0.0 1.0"/>
+          </material>
+        </visual>
+        <collision>
+          <origin xyz="0 0 0" rpy="1.57 0 0"/>
+          <geometry>
+            <cylinder radius="0.05" length="0.02"/>
+          </geometry>
+        </collision>
+    </link>
+</robot>

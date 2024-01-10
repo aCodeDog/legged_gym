@@ -1,0 +1,1 @@
+/usr/bin/c++  -O3 -fPIC  -rdynamic CMakeFiles/example_walk.dir/example/example_walk.cpp.o  -o example_walk   -L/home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/src/unitree_legged_sdk/lib/cpp/amd64  -Wl,-rpath,/home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/src/unitree_legged_sdk/lib/cpp/amd64: -pthread -Wl,-Bstatic -lunitree_legged_sdk -Wl,-Bdynamic 

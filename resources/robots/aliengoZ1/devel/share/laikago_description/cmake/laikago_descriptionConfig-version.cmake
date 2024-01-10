@@ -1,0 +1,1 @@
+/home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/.private/laikago_description/share/laikago_description/cmake/laikago_descriptionConfig-version.cmake

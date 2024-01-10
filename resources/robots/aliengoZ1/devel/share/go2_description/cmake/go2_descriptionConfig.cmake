@@ -1,0 +1,1 @@
+/home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/.private/go2_description/share/go2_description/cmake/go2_descriptionConfig.cmake

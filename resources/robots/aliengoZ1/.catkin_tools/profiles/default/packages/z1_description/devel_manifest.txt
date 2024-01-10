@@ -1,0 +1,5 @@
+robots/z1_description
+/home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/.private/z1_description/cmake.lock /home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/./cmake.lock
+/home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/.private/z1_description/share/z1_description/cmake/z1_descriptionConfig.cmake /home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/share/z1_description/cmake/z1_descriptionConfig.cmake
+/home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/.private/z1_description/share/z1_description/cmake/z1_descriptionConfig-version.cmake /home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/share/z1_description/cmake/z1_descriptionConfig-version.cmake
+/home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/.private/z1_description/lib/pkgconfig/z1_description.pc /home/g54/issac_gym/legged_gym/resources/robots/aliengoZ1/devel/lib/pkgconfig/z1_description.pc
