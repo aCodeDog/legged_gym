@@ -34,9 +34,9 @@ print(sys.path)
 from legged_gym.envs.base.legged_robot_manipulator_config import LeggedManipuatorRobotCfg, LeggedManipuatorRobotCfgPPO
 class AliengoManipulatorRoughCfg( LeggedManipuatorRobotCfg ):
     class env(LeggedManipuatorRobotCfg.env):
-        num_envs =8192
+        num_envs = 7
         num_actions = 19
-        num_observations = 303
+        num_observations = 265
     
     class commands( LeggedManipuatorRobotCfg.commands ):
         curriculum = False
@@ -45,8 +45,8 @@ class AliengoManipulatorRoughCfg( LeggedManipuatorRobotCfg ):
         resampling_time = 10. # time before command are changed[s]
         heading_command = True # if true: compute ang vel command from heading error
         class ranges:
-            lin_vel_x = [0, 0] # min max [m/s]
-            lin_vel_y = [0, 0]   # min max [m/s]
+            lin_vel_x = [-1, 1] # min max [m/s]
+            lin_vel_y = [-0.5, 0.5]   # min max [m/s]
             ang_vel_yaw = [0, 0]    # min max [rad/s]
             heading = [0, 0]
             pos_x = [-5,5]
@@ -84,31 +84,32 @@ class AliengoManipulatorRoughCfg( LeggedManipuatorRobotCfg ):
     class rewards( LeggedManipuatorRobotCfg.rewards ):
         class scales( LeggedManipuatorRobotCfg.rewards.scales):
             termination = -0.01
-            tracking_lin_vel = 2
-            tracking_ang_vel = 0.5
+            tracking_lin_vel = 4
+            tracking_ang_vel = 1
             lin_vel_z = -0.5
             ang_vel_xy = -0.05
-            orientation = -0.5
-            torques = -0.00001
+            orientation = -1
+            torques = -0.0001
+            torques_rate = -0.0001
             dof_vel = -2.5e-7
             dof_acc = -2.5e-7
             base_height = -0.5
-            feet_air_time =  0.2
+            feet_air_time =  1.0
             collision = -1.
             feet_stumble = -0. 
             action_rate = -0.0001
             stand_still = -0.05
             lifting =0.
-            object_distance = 0.
-            joint_pos = -0.1
+            object_distance = 6.
+            joint_pos = -0.3
 
 
         only_positive_rewards = True # if true negative total rewards are clipped at zero (avoids early termination problems)
         tracking_sigma = 0.4 # tracking reward = exp(-error^2/sigma)
-        object_sigma = 1 # grasp reward = exp(-error^2/sigma)
-        soft_dof_pos_limit = 0.9 # percentage of urdf limits, values above this limit are penalized
-        soft_dof_vel_limit = 0.9
-        soft_torque_limit = 1.
+        object_sigma = 0.4 # grasp reward = exp(-error^2/sigma)
+        soft_dof_pos_limit = 0.7 # percentage of urdf limits, values above this limit are penalized
+        soft_dof_vel_limit = 0.7
+        soft_torque_limit = 7.
         base_height_target = 0.34
         max_contact_force = 100. # forces above this value are penalized
 
@@ -120,7 +121,7 @@ class AliengoManipulatorRoughCfg( LeggedManipuatorRobotCfg ):
         # action scale: target angle = actionScale * action + defaultAngle
         action_scale = 0.25
         # decimation: Number of control action updates @ sim DT per policy DT
-        decimation = 4
+        decimation = 3
         wheel_speed = 0.5 # [rad/s]
 
     class asset( LeggedManipuatorRobotCfg.asset ):
@@ -140,7 +141,7 @@ class AliengoManipulatorRoughCfgPPO( LeggedManipuatorRobotCfgPPO ):
         entropy_coef = 0.01
     class runner( LeggedManipuatorRobotCfgPPO.runner ):
         run_name = ''
-        experiment_name = 'aliengoManipulatorInit_1'
+        experiment_name = 'test'
         #resume = True
         num_steps_per_env = 48 # per iteration
         max_iterations = 1300
@@ -151,6 +152,6 @@ class AliengoManipulatorRoughCfgPPO( LeggedManipuatorRobotCfgPPO ):
         #load_run = "/home/g54/issac_gym/legged_gym/logs/aliengoManipulatorInit_1/Dec25_15-06-21_" # -1 = last run
         #checkpoint = 12000 # -1 = last saved model
         #experiment_name = '48machine'
-        load_run = "/home/g54/issac_gym/legged_gym/logs/48machine"
+        load_run = "/home/g54/issac_gym/legged_gym/logs/"+experiment_name
         #load_run = "/home/g54/issac_gym/legged_gym/logs/48machine"
-        checkpoint = 3001
+        checkpoint = 7300

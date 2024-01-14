@@ -95,7 +95,7 @@ class LeggedRobotCfg(BaseConfig):
         action_scale = 0.5
         # decimation: Number of control action updates @ sim DT per policy DT
         decimation = 4
-        wheel_speed = 0.5 # [rad/s],if no wheel,will not be used
+        wheel_speed = 0.05 # [rad/s],if no wheel,will not be used
 
     class asset:
         file = ""

@@ -97,15 +97,15 @@ class Arx7RoughCfg( LeggedRobotCfg ):
             tracking_lin_vel = 4.0
             tracking_ang_vel = 4.0
             lin_vel_z = -0.01
-            ang_vel_xy = -0.05
-            orientation = -4
-            torques = -0.00001
-            dof_vel = -0.
+            ang_vel_xy = -0.9
+            orientation = -1
+            torques = -0.0001
+            dof_vel = -2.5e-7
             dof_acc = -2.5e-7
             base_height = -0.5
-            feet_air_time =  1.0
+            feet_air_time =  1.5
             collision = -0.2
-            feet_stumble = -0.4
+            feet_stumble = -0.01
             action_rate = -0.01
             stand_still = -1.
             joint_pos = -0.3
@@ -144,15 +144,19 @@ class Arx7RoughCfg( LeggedRobotCfg ):
 
 class Arx7RoughCfgPPO( LeggedRobotCfgPPO ):
     class algorithm( LeggedRobotCfgPPO.algorithm ):
-        entropy_coef = 0.03
+        entropy_coef = 0.01
     class runner( LeggedRobotCfgPPO.runner ):
         run_name = ''
         experiment_name = 'arx7p_0'
-        resume = True
+        #resume = True
         num_steps_per_env = 48 # per iteration
-        max_iterations = 6000
+        max_iterations = 3020
         load_run = "/home/g54/issac_gym/legged_gym/logs/"+ experiment_name# -1 = last run
         #load_run = "/home/g54/issac_gym/legged_gym/logs/48machine"
-        checkpoint = 9000
-
-  
+        checkpoint = 3000 
+    class policy:
+        init_noise_std = 1.0
+        actor_hidden_dims = [512, 256, 128]
+        critic_hidden_dims = [512, 256, 128]
+        activation = 'selu'   # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
+    

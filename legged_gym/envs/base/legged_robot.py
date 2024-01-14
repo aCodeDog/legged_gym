@@ -621,7 +621,12 @@ class LeggedRobot(BaseTask):
         if self.cfg.terrain.measure_heights:
             self.height_points = self._init_height_points()
         self.measured_heights = 0
-
+        
+        self._global_indices = torch.arange(self.num_envs,device=self.device).view(self.num_envs, -1)# self.num_envs x 3 [0 ~ num_envs x 3]
+        # print(self._global_indices )
+        envs_num = torch.arange(self.num_envs,device=self.device).view(self.num_envs, -1)
+        self.robot_env_ids = self._global_indices[envs_num, 0].flatten()
+        self.robot_env_ids = to_torch(self.robot_env_ids, dtype=torch.long, device=self.device)
         # joint positions offsets and PD gains
         self.default_dof_pos = torch.zeros(self.num_dof, dtype=torch.float, device=self.device, requires_grad=False)
         print("joint names:",self.dof_names)

@@ -118,11 +118,36 @@ class LeggedManipulatorRobot(BaseTask):
             calls self._post_physics_step_callback() for common computations 
             calls self._draw_debug_vis() if needed
         """
+        actor_root_state = self.gym.acquire_actor_root_state_tensor(self.sim)
+        rigid_body_tensor = self.gym.acquire_rigid_body_state_tensor(self.sim)
+        dof_state_tensor = self.gym.acquire_dof_state_tensor(self.sim)
+        net_contact_forces = self.gym.acquire_net_contact_force_tensor(self.sim)
+
+        
+        self.gym.refresh_dof_state_tensor(self.sim)
+        self.gym.refresh_rigid_body_state_tensor(self.sim)
         self.gym.refresh_actor_root_state_tensor(self.sim)
         self.gym.refresh_net_contact_force_tensor(self.sim)
-        actor_root_state = self.gym.acquire_actor_root_state_tensor(self.sim)
+        
+        
         self.root_states = gymtorch.wrap_tensor(actor_root_state).view(-1, 13)
         self.robot_root_states = self.root_states[self.robot_env_ids,:]
+        
+        self.rigid_body_states = gymtorch.wrap_tensor(rigid_body_tensor).view(self.num_envs, -1, 13)
+        self.gripperMover_handles = self.gym.find_asset_rigid_body_index(self.robot_asset, "gripperMover")
+        self.base_handles = self.gym.find_asset_rigid_body_index(self.robot_asset, "base")
+        self._gripper_state = self.rigid_body_states[:, self.gripperMover_handles][:, 0:13]
+        self._gripper_pos = self.rigid_body_states[:, self.gripperMover_handles][:, 0:3]
+        self._gripper_rot = self.rigid_body_states[:, self.gripperMover_handles][:, 3:7]
+        self.base_pos = self.rigid_body_states[:, self.base_handles][:, 0:3]
+        
+        self.dof_state = gymtorch.wrap_tensor(dof_state_tensor)
+        self.dof_pos = self.dof_state.view(self.num_envs, self.num_dof, 2)[..., 0]
+        self.dof_vel = self.dof_state.view(self.num_envs, self.num_dof, 2)[..., 1]
+        self.base_quat = self.robot_root_states[:, 3:7]
+
+        self.contact_forces = gymtorch.wrap_tensor(net_contact_forces).view(self.num_envs, -1, 3)
+        
         self.episode_length_buf += 1
         self.common_step_counter += 1
 
@@ -259,8 +284,8 @@ class LeggedManipulatorRobot(BaseTask):
                                     self.dof_vel * self.obs_scales.dof_vel,
                                     self.actions
                                     ,
-                                    self.dof_pos,
-                                    self.default_dof_pos,
+                                    #self.dof_pos,
+                                    #self.default_dof_pos,
                                     self._gripper_pos,
                                     self.cube_object_pos,
                                     (self._gripper_pos-self.cube_object_pos)* self.obs_scales.object_distance
@@ -660,7 +685,7 @@ class LeggedManipulatorRobot(BaseTask):
         self.gym.refresh_rigid_body_state_tensor(self.sim)
         
         # create some wrapper tensors for different slices
-        self._global_indices = torch.arange(self.num_envs*self.actor_num,device=self.device).view(self.num_envs, -1)# self.num_envs x 3 [0 ~ num_envs x 3]
+        self._global_indices = torch.arange(self.num_envs*1,device=self.device).view(self.num_envs, -1)# self.num_envs x 3 [0 ~ num_envs x 3]
         # print(self._global_indices )
         envs_num = torch.arange(self.num_envs,device=self.device).view(self.num_envs, -1)
         # print(envs_num)
@@ -983,8 +1008,8 @@ class LeggedManipulatorRobot(BaseTask):
             table_start_pose.p = gymapi.Vec3(*table_pos_start)
 
             if(self.create_box ==True):
-                table_actor = self.gym.create_actor(env_handle, table_asset, table_start_pose, "table", i+self.num_envs, 1, 0)
-                table_object_idx = self.gym.get_actor_index(env_handle, table_actor, gymapi.DOMAIN_SIM)
+                #table_actor = self.gym.create_actor(env_handle, table_asset, table_start_pose, "table", i+self.num_envs, 1, 0)
+                #table_object_idx = self.gym.get_actor_index(env_handle, table_actor, gymapi.DOMAIN_SIM)
                 # table_stand_actor = self.gym.create_actor(env_handle, table_stand_asset, table_stand_start_pose, "table_stand",
                 #                                            i, 1, 0)
 
@@ -1035,7 +1060,7 @@ class LeggedManipulatorRobot(BaseTask):
                 )            
                 cube_object_idx = self.gym.get_actor_index(env_handle, self._cubeA_id, gymapi.DOMAIN_SIM)
                 #print("cube_object_idx:",cube_object_idx)
-                table_object_indices.append(table_object_idx)
+                #table_object_indices.append(table_object_idx)
                 cube_object_indices.append(cube_object_idx)
 
                 for keypoint in self.keypoints_offsets:
@@ -1328,7 +1353,8 @@ class LeggedManipulatorRobot(BaseTask):
         return torch.sum(torch.square(self.dof_pos - self.default_dof_pos), dim=1)
     def _reward_object_distance(self) -> Tuple[Tensor, Tensor, Tensor]:
         """Reward for lifting the object off the table."""
-        dis_err = torch.sum(torch.square(self._gripper_pos-self.cube_object_pos), dim=1)
+        #dis_err = torch.sum(torch.square(self._gripper_pos-self.cube_object_pos), dim=1)
+        dis_err = torch.sum(torch.square(self._gripper_pos-self.robot_root_states[:,0:3]+torch.tensor([0.5, 0.3, 0.4],device=self.device)), dim=1)
         #print("_object_distance:",dis_err,"value:",torch.exp(-dis_err/self.cfg.rewards.object_sigma).shape)  #[0.7~3.5]
         return torch.exp(-dis_err/self.cfg.rewards.object_sigma)
     def _reward_orientation_quat(self):
