@@ -28,9 +28,6 @@
 #
 # Copyright (c) 2021 ETH Zurich, Nikita Rudin
 import sys
-sys.path.append("/home/g54/issac_gym")
-sys.path.append("/home/g54/issac_gym/legged_gym")
-sys.path.append("/home/g54/issac_gym/rsl_rl")
 import numpy as np
 import os
 from datetime import datetime

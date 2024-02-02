@@ -437,10 +437,12 @@ class LeggedRobot(BaseTask):
         control_type = self.cfg.control.control_type
         dof_err = self.default_dof_pos - self.dof_pos
         #print("1dof_err:",dof_err)
-        dof_err[:,self.wheel_indices] =  self.cfg.control.wheel_speed
+        #dof_err[:,self.wheel_indices] =  self.cfg.control.wheel_speed
         #print("2dof_err:",dof_err)
         if control_type=="P":
+            
             torques = self.p_gains*(actions_scaled + dof_err) - self.d_gains*self.dof_vel
+            #torques[:,self.wheel_indices] = 0
         elif control_type=="V":
             torques = self.p_gains*(actions_scaled - self.dof_vel) - self.d_gains*(self.dof_vel - self.last_dof_vel)/self.sim_params.dt
         elif control_type=="T":
@@ -768,7 +770,7 @@ class LeggedRobot(BaseTask):
         for name in self.cfg.asset.wheel_name:
             wheel_names.extend([s for s in self.dof_names if name in s])
         arm_names =[]
-        for name in self.cfg.asset.wheel_name:
+        for name in self.cfg.asset.arm_name:
             arm_names.extend([s for s in self.dof_names if name in s])
         print("******body wheel_names:",wheel_names)
         print("******body arm_names:",arm_names)
@@ -815,10 +817,9 @@ class LeggedRobot(BaseTask):
         self.wheel_indices = torch.zeros(len(wheel_names), dtype=torch.long, device=self.device, requires_grad=False)
         for i in range(len(wheel_names)):
             self.wheel_indices[i] = self.gym.find_actor_dof_handle(self.envs[0], self.actor_handles[0], wheel_names[i])
-        #print("******wheel_indices:",self.wheel_indices)
         self.arm_indices = torch.zeros(len(arm_names), dtype=torch.long, device=self.device, requires_grad=False)
         for i in range(len(arm_names)):
-            self.arm_indices[i] = self.gym.find_actor_dof_handle(self.envs[0], self.actor_handles[0], wheel_names[i])
+            self.arm_indices[i] = self.gym.find_actor_dof_handle(self.envs[0], self.actor_handles[0], arm_names[i])
     def _get_env_origins(self):
         """ Sets environment origins. On rough terrain the origins are defined by the terrain platforms.
             Otherwise create a grid.

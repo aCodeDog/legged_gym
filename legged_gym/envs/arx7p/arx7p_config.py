@@ -42,14 +42,14 @@ class Arx7RoughCfg( LeggedRobotCfg ):
         resampling_time = 10. # time before command are changed[s]
         heading_command = True # if true: compute ang vel command from heading error
         class ranges:
-            lin_vel_x = [0.5, 1.0] # min max [m/s]
+            lin_vel_x = [1, 2.0] # min max [m/s]
             lin_vel_y = [-0.3, 0.3]   # min max [m/s]
             ang_vel_yaw = [0,0]    # min max [rad/s]
             heading = [-3.14, 3.14]
     class terrain(LeggedRobotCfg.terrain):
         mesh_type = 'trimesh' # "heightfield" # none, plane, heightfield or trimesh
         horizontal_scale = 0.1 # [m]
-        vertical_scale = 0.005 # [m]
+        vertical_scale = 0.001 # [m]
         border_size = 25 # [m]
         curriculum = True
         static_friction = 1.0
@@ -67,9 +67,9 @@ class Arx7RoughCfg( LeggedRobotCfg ):
         num_rows= 10 # number of terrain rows (levels)
         num_cols = 20 # number of terrain cols (types)
         # terrain types: [smooth slope, rough slope, stairs up, stairs down, discrete]
-        terrain_proportions = [0.1, 0.1, 0.8, 0.0, 0.0]
+        terrain_proportions = [0, 0, 1, 0.0, 0.0]
         # trimesh only:
-        slope_treshold = 0.75 # slopes above this threshold will be corrected to vertical surfaces
+        slope_treshold = 0.5 # slopes above this threshold will be corrected to vertical surfaces
    
     class init_state( LeggedRobotCfg.init_state ):
         pos = [0.0, 0.0, 0.60] # x,y,z [m]
@@ -95,21 +95,21 @@ class Arx7RoughCfg( LeggedRobotCfg ):
         class scales:
             termination = -0.1
             tracking_lin_vel = 4.0
-            tracking_ang_vel = 4.0
+            tracking_ang_vel = 0.2
             lin_vel_z = -0.01
-            ang_vel_xy = -0.9
-            orientation = -1
+            ang_vel_xy = -0.01
+            orientation = -0.1
             torques = -0.0001
-            dof_vel = -2.5e-7
-            dof_acc = -2.5e-7
-            base_height = -0.5
-            feet_air_time =  1.5
+            dof_vel = -2.5e-8
+            dof_acc = -2.5e-8
+            base_height = -0.1
+            feet_air_time =  1.
             collision = -0.2
             feet_stumble = -0.01
-            action_rate = -0.01
-            stand_still = -1.
-            joint_pos = -0.3
-            dof_pos_limits = -0.1
+            action_rate = -0.0001
+            stand_still = -0.1
+            joint_pos = -0.05
+            dof_pos_limits = -0.01
             arm_pos = -0.
         only_positive_rewards = True # if true negative total rewards are clipped at zero (avoids early termination problems)
         tracking_sigma = 0.4 # tracking reward = exp(-error^2/sigma)
@@ -128,7 +128,7 @@ class Arx7RoughCfg( LeggedRobotCfg ):
         action_scale = 0.25
         # decimation: Number of control action updates @ sim DT per policy DT
         decimation = 4
-        wheel_speed = 0.3 # [rad/s]
+        wheel_speed = 0. # [rad/s]
         task = "rough_terrain"
 
     class asset( LeggedRobotCfg.asset ):
@@ -136,7 +136,7 @@ class Arx7RoughCfg( LeggedRobotCfg ):
         name = "arx7p"
         foot_name = "wheel"  #link name
         arm_name = "joint"  #joint name
-        penalize_contacts_on = ["base","knee","hip"]  #link name
+        penalize_contacts_on = ["base","knee","hip","ankle"]  #link name
         terminate_after_contacts_on = []  #link name
         wheel_name =[ "ankle"] #wheel joints name, joint name
         self_collisions = 0 # 1 to disable, 0 to enable...bitwise filter "base","calf","hip","thigh"
@@ -150,13 +150,13 @@ class Arx7RoughCfgPPO( LeggedRobotCfgPPO ):
         experiment_name = 'arx7p_0'
         #resume = True
         num_steps_per_env = 48 # per iteration
-        max_iterations = 3020
+        max_iterations = 3511
         load_run = "/home/g54/issac_gym/legged_gym/logs/"+ experiment_name# -1 = last run
         #load_run = "/home/g54/issac_gym/legged_gym/logs/48machine"
-        checkpoint = 3000 
+        checkpoint = 650
     class policy:
         init_noise_std = 1.0
-        actor_hidden_dims = [512, 256, 128]
-        critic_hidden_dims = [512, 256, 128]
+        actor_hidden_dims = [512, 256, 128,64]
+        critic_hidden_dims = [512, 256, 128,64]
         activation = 'selu'   # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
     

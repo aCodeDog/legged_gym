@@ -1,0 +1,14 @@
+/home/g54/issac_gym/isaacgym/python/isaacgym/_bindings/linux-x86_64/gym_38.so
+Importing module 'gym_38' (/home/g54/issac_gym/isaacgym/python/isaacgym/_bindings/linux-x86_64/gym_38.so)
+Setting GYM_USD_PLUG_INFO_PATH to /home/g54/issac_gym/isaacgym/python/isaacgym/_bindings/linux-x86_64/usd/plugInfo.json
+['/home/g54/issac_gym/legged_gym/legged_gym/scripts', '/opt/ros/noetic/lib/python3/dist-packages', '/home/g54/anaconda3/envs/legged_robot/lib/python38.zip', '/home/g54/anaconda3/envs/legged_robot/lib/python3.8', '/home/g54/anaconda3/envs/legged_robot/lib/python3.8/lib-dynload', '/home/g54/.local/lib/python3.8/site-packages', '/home/g54/issac_gym/IsaacGymEnvs', '/home/g54/anaconda3/envs/legged_robot/lib/python3.8/site-packages', '/home/g54/issac_gym/rsl_rl', '/home/g54/issac_gym/isaacgym/python', '/home/g54/issac_gym/legged_gym', '/home/g54/work_these_ways/walk-these-ways', '/home/g54/issac_gym/DexterousHands', '/home/g54/issac_gym']
+['/home/g54/issac_gym/legged_gym/legged_gym/scripts', '/opt/ros/noetic/lib/python3/dist-packages', '/home/g54/anaconda3/envs/legged_robot/lib/python38.zip', '/home/g54/anaconda3/envs/legged_robot/lib/python3.8', '/home/g54/anaconda3/envs/legged_robot/lib/python3.8/lib-dynload', '/home/g54/.local/lib/python3.8/site-packages', '/home/g54/issac_gym/IsaacGymEnvs', '/home/g54/anaconda3/envs/legged_robot/lib/python3.8/site-packages', '/home/g54/issac_gym/rsl_rl', '/home/g54/issac_gym/isaacgym/python', '/home/g54/issac_gym/legged_gym', '/home/g54/work_these_ways/walk-these-ways', '/home/g54/issac_gym/DexterousHands', '/home/g54/issac_gym', '/home/g54/issac_gym', '/home/g54/issac_gym/rsl_rl']
+Traceback (most recent call last):
+  File "train.py", line 36, in <module>
+    from legged_gym.envs import *
+  File "/home/g54/issac_gym/legged_gym/legged_gym/envs/__init__.py", line 34, in <module>
+    from legged_gym.envs.AliengoManipulator.aliengo_manipulator_config import AliengoManipulatorRoughCfg, AliengoManipulatorRoughCfgPPO
+  File "/home/g54/issac_gym/legged_gym/legged_gym/envs/AliengoManipulator/aliengo_manipulator_config.py", line 155
+    load_run = "/home/g54/issac_gym/legged_gym/logs/"+experiment_name+
+                                                                     ^
+SyntaxError: invalid syntax

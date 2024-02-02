@@ -152,21 +152,7 @@ class LeggedManipulatorRobot(BaseTask):
         self.common_step_counter += 1
 
         
-        if(self.create_box ==True):
-        # #update cube state
-            self.cube_object_state = self.root_states[self.cube_object_indices, 0:13]
-            self.cube_object_pose = self.root_states[self.cube_object_indices, 0:7]
-            self.cube_object_pos = self.root_states[self.cube_object_indices, 0:3]
-            self.cube_object_rot = self.root_states[self.cube_object_indices, 3:7]
-            self.cube_object_linvel = self.root_states[self.cube_object_indices, 7:10]
-            self.cube_object_angvel = self.root_states[self.cube_object_indices, 10:13]
 
-            #update gripper state
-            self._gripper_state = self.rigid_body_states[:, self.gripperMover_handles][:, 0:13]
-            self._gripper_pos = self.rigid_body_states[:, self.gripperMover_handles][:, 0:3]
-            self._gripper_rot = self.rigid_body_states[:, self.gripperMover_handles][:, 3:7]
-
-        #print("##_gripper_pos:",self._gripper_pos)
         # prepare quantities
         self.base_quat[:] = self.robot_root_states[:, 3:7]
         self.base_lin_vel[:] = quat_rotate_inverse(self.base_quat, self.robot_root_states[:, 7:10])
@@ -174,6 +160,16 @@ class LeggedManipulatorRobot(BaseTask):
         self.projected_gravity[:] = quat_rotate_inverse(self.base_quat, self.gravity_vec)
 
         self._post_physics_step_callback()
+        if(self.create_box ==True):
+        # #update cube state
+            self.cube_object_state = self.root_states[self.cube_object_indices, 0:13]
+            self.cube_object_pose = self.root_states[self.cube_objects_indices, 0:7]
+            self.cube_object_pos = self.root_states[self.cube_object_indices, 0:3]
+            self.cube_object_rot = self.root_states[self.cube_object_indices, 3:7]
+            self.cube_object_linvel = self.root_states[self.cube_object_indices, 7:10]
+            self.cube_object_angvel = self.root_states[self.cube_object_indices, 10:13]
+        else:
+            self.update_obj_pos()
 
         # compute observations, rewards, resets, ...
         self.check_termination()
@@ -185,6 +181,7 @@ class LeggedManipulatorRobot(BaseTask):
         self.last_actions[:] = self.actions[:]
         self.last_dof_vel[:] = self.dof_vel[:]
         self.last_root_vel[:] = self.robot_root_states[:, 7:13]
+        
 
         if self.viewer and self.enable_viewer_sync and self.debug_viz:
             self._draw_debug_vis()
@@ -192,6 +189,7 @@ class LeggedManipulatorRobot(BaseTask):
     def check_termination(self):
         """ Check if environments need to be reset
         """
+        body_force=self.contact_forces[:, self.termination_contact_indices, :]
         self.reset_buf = torch.any(torch.norm(self.contact_forces[:, self.termination_contact_indices, :], dim=-1) > 1., dim=1)
         self.time_out_buf = self.episode_length_buf > self.max_episode_length # no terminal reward for time-outs
         self.reset_buf |= self.time_out_buf
@@ -270,18 +268,14 @@ class LeggedManipulatorRobot(BaseTask):
     def compute_observations(self):
         """ Computes observations
         """
-        if(self.create_box ==False):
-            self._gripper_pos = torch.zeros((self.num_envs,3),dtype=torch.float,device=self.device)
-            self.cube_object_pos = torch.zeros((self.num_envs,3),dtype=torch.float,device=self.device)
-        # self._gripper_pos = torch.zeros((self.num_envs,3),dtype=torch.float,device=self.device)
-        # self.cube_object_pos = torch.zeros((self.num_envs,3),dtype=torch.float,device=self.device)
-                
+        
         self.obs_buf = torch.cat((  self.base_lin_vel * self.obs_scales.lin_vel,
                                     self.base_ang_vel  * self.obs_scales.ang_vel,
                                     self.projected_gravity,
                                     self.commands[:, :3] * self.commands_scale,
                                     (self.dof_pos - self.default_dof_pos) * self.obs_scales.dof_pos,
                                     self.dof_vel * self.obs_scales.dof_vel,
+                                    self.dof_pos,
                                     self.actions
                                     ,
                                     #self.dof_pos,
@@ -520,7 +514,6 @@ class LeggedManipulatorRobot(BaseTask):
             dpose = torch.cat([pos_err, orn_err], -1).unsqueeze(-1)
             self.arm_u = self.control_ik(Z1_j_eef,dpose)
         else:
-            self.cube_object_pos = torch.zeros((self.cfg.env.num_envs, 3), dtype=torch.float, device=self.device)
             self.cube_object_rot = torch.zeros((self.cfg.env.num_envs, 4), dtype=torch.float, device=self.device)
             self.arm_u =torch.zeros((self.cfg.env.num_envs, 12), dtype=torch.float, device=self.device)
         #print("V_EE.shape:",V_EE.shape)
@@ -574,7 +567,7 @@ class LeggedManipulatorRobot(BaseTask):
         """
         # base position
         #print("env_ids",env_ids)
-        self._global_indices = torch.arange(self.num_envs*self.actor_num, dtype=torch.int32,device=self.device).view(self.num_envs, -1)
+        self._global_indices = torch.arange(self.num_envs*self.actor_num, dtype=torch.long,device=self.device).view(self.num_envs, -1)
         env_ids_int32 = self._global_indices[env_ids, 0].flatten() #robot env_ids
         #print("env_ids_int32",env_ids_int32)
         #print("env_ids",env_ids)
@@ -588,15 +581,20 @@ class LeggedManipulatorRobot(BaseTask):
             #reset cube state
             if(self.create_box ==True):
                 self.root_states[env_ids_int32+2] =self.cube_object_init_state[env_ids]
+            else:
+                self.choice_obj_seed[:,env_ids_int32] = torch.randint(0, len(self.virtual_obj_pos_indices), (1, len(env_ids_int32)), device=self.device)
         else:
             self.root_states[env_ids_int32] = self.base_init_state
             self.root_states[env_ids_int32, :3] += self.env_origins[env_ids]
             if(self.create_box ==True):
                 self.root_states[env_ids_int32+2] =self.cube_object_init_state[env_ids]
                 self.root_states[env_ids_int32+1] =self.table_object_init_state[env_ids]
+            else:
+                self.choice_obj_seed[:,env_ids_int32] = torch.randint(0, len(self.virtual_obj_pos_indices), (1, len(env_ids_int32)), device=self.device)
         # base velocities
         #print("self.base_init_state.shape:",self.base_init_state.shape)
         self.root_states[env_ids_int32, 7:13] = torch_rand_float(-0.5, 0.5, (len(env_ids_int32), 6), device=self.device) # [7:10]: lin vel, [10:13]: ang vel
+        env_ids_int32 = env_ids_int32.to(dtype=torch.int32)
         self.gym.set_actor_root_state_tensor_indexed(self.sim,
                                                      gymtorch.unwrap_tensor(self.root_states),
                                                      gymtorch.unwrap_tensor(env_ids_int32), len(env_ids_int32))
@@ -740,6 +738,27 @@ class LeggedManipulatorRobot(BaseTask):
         self.base_lin_vel = quat_rotate_inverse(self.base_quat, self.robot_root_states[:, 7:10])
         self.base_ang_vel = quat_rotate_inverse(self.base_quat, self.robot_root_states[:, 10:13])
         self.projected_gravity = quat_rotate_inverse(self.base_quat, self.gravity_vec)
+        
+        self.cube_object_pose = torch.zeros((self.cfg.env.num_envs, 7), dtype=torch.float, device=self.device)
+        self.cube_object_pos = torch.zeros((self.cfg.env.num_envs, 3), dtype=torch.float, device=self.device)
+        self.cube_object_rot = torch.zeros((self.cfg.env.num_envs, 4), dtype=torch.float, device=self.device)
+        
+        
+        ranges = [(3,13),(2,9)]
+        virtual_obj_pos_indices = []
+        for j in range(17):
+            for k in range(11):
+                if j in range(ranges[0][0],ranges[0][1]) and k in range(ranges[1][0],ranges[1][1]):
+                    continue
+                else:
+                    virtual_obj_pos_indices.append(j*11+k)
+                        # x = self.cube_object_pos[i, 0] 
+                        # y = self.cube_object_pos[i, 1] 
+                        # z = self.cube_object_pos[i, 2]
+
+        self.virtual_obj_pos_indices = to_torch(virtual_obj_pos_indices, dtype=torch.long, device=self.device)
+        choice_obj_seed = np.random.randint(low=0, high=len(self.virtual_obj_pos_indices), size=(1, self.num_envs))
+        self.choice_obj_seed = to_torch(choice_obj_seed, dtype=torch.long, device=self.device)
         if self.cfg.terrain.measure_heights:
             self.height_points = self._init_height_points()
         self.measured_heights = 0
@@ -878,7 +897,7 @@ class LeggedManipulatorRobot(BaseTask):
         body_names = self.gym.get_asset_rigid_body_names(robot_asset)
         self.gripperMover_handles = self.gym.find_asset_rigid_body_index(robot_asset, "gripperMover")
 
-        # print("###self.rigid_body_states.shappe:",self.rigid_body_states)
+        #print("###self.rigid_body names:",body_names)
         # print("####### self.gripperMover_handles:", self.gripperMover_handles)
         # print("######rigid_body_names:",body_names)
         #self.rigid_body_states
@@ -888,6 +907,7 @@ class LeggedManipulatorRobot(BaseTask):
         # print("##self._palm_state:",self._palm_state)
         # save body names from the asset
         self.dof_names = self.gym.get_asset_dof_names(robot_asset)
+        #print("###self.dof names:",body_names)
         self.num_bodies = len(body_names)
         self.num_dofs = len(self.dof_names)
         feet_names = [s for s in body_names if self.cfg.asset.foot_name in s]
@@ -901,9 +921,15 @@ class LeggedManipulatorRobot(BaseTask):
         for name in self.cfg.asset.wheel_name:
             wheel_names.extend([s for s in self.dof_names if name in s])
         arm_names =[]
-        for name in self.cfg.asset.wheel_name:
-            arm_names.extend([s for s in self.dof_names if name in s])    
-
+        for name in self.cfg.asset.arm_name:
+            arm_names.extend([s for s in self.dof_names if name in s])
+        print("###self.rigid_body names:",body_names)
+        print("###self.dof names:",body_names)
+        print("###penalized_contact_names:",penalized_contact_names)
+        print("###termination_contact_names:",termination_contact_names)
+        print("###feet_names:",feet_names)
+        print("###wheels name:",wheel_names)
+        print("###arm_names:",arm_names)
         
 
         base_init_state_list = self.cfg.init_state.pos + self.cfg.init_state.rot + self.cfg.init_state.lin_vel + self.cfg.init_state.ang_vel
@@ -1140,6 +1166,18 @@ class LeggedManipulatorRobot(BaseTask):
         self.max_episode_length = np.ceil(self.max_episode_length_s / self.dt)
 
         self.cfg.domain_rand.push_interval = np.ceil(self.cfg.domain_rand.push_interval_s / self.dt)
+    def obj_visualize(self):
+        self.gym.clear_lines(self.viewer)
+        self.gym.refresh_rigid_body_state_tensor(self.sim)
+        sphere_geom = gymutil.WireframeSphereGeometry(0.02, 4, 4, None, color=(1, 1, 0))
+        heights = self.measured_heights
+        height_points = quat_apply_yaw(self.base_quat.repeat(heights.shape[0]), self.height_points)
+        for i in range(self.num_envs):
+            x = height_points[150, 0] + self.robot_root_states[i, 0]
+            y = height_points[150, 1] + self.robot_root_states[i, 1]
+            z = height_points[150, 2] +self.robot_root_states[i, 2]
+            sphere_pose = gymapi.Transform(gymapi.Vec3(x, y, z), r=None)
+            gymutil.draw_lines(sphere_geom, self.gym, self.viewer, self.envs[i], sphere_pose)             
 
     def _draw_debug_vis(self):
         """ Draws visualizations for dubugging (slows down simulation a lot).
@@ -1161,7 +1199,43 @@ class LeggedManipulatorRobot(BaseTask):
                 z = heights[j]
                 sphere_pose = gymapi.Transform(gymapi.Vec3(x, y, z), r=None)
                 gymutil.draw_lines(sphere_geom, self.gym, self.viewer, self.envs[i], sphere_pose) 
-
+                
+    def update_obj_pos(self):
+        """ Draws visualizations for dubugging (slows down simulation a lot).
+            Default behaviour: draws height measurement points
+        """
+        # draw height lines
+        # if not self.terrain.cfg.measure_heights:
+        #     return
+        self.gym.clear_lines(self.viewer)
+        self.gym.refresh_rigid_body_state_tensor(self.sim)
+        # obj_num = 1
+        # 
+        
+        # heights = self.measured_heights
+        height_points = quat_apply_yaw(self.base_quat.repeat(1, self.num_height_points), self.height_points) + (self.robot_root_states[:, :3]).unsqueeze(1)
+#        obj_pos_indices = 
+       
+        
+        #self.cube_object_pos[:,:3] = torch.cat((x.unsqueeze(1),y.unsqueeze(1),z.unsqueeze(1)),dim=1)
+        #select a indice from self.virtual_obj_pos_indices
+        
+        #self.seed = np.random.randint(low=0, high=len(self.virtual_obj_pos_indices), size=(1, self.num_envs))
+        sphere_geom = gymutil.WireframeSphereGeometry(0.02, 4, 4, None, color=(1, 1, 0))
+        virtual_indices = self.virtual_obj_pos_indices.repeat(self.num_envs,1)
+        seed = to_torch(self.choice_obj_seed, device=self.device, dtype=torch.long).view(self.num_envs,1)
+        obj_pos_indices = virtual_indices.gather(1, seed).view(self.num_envs,1)
+        obj_pos_indices = obj_pos_indices.repeat(1,3).view(self.num_envs,1,3)
+        
+        self.virtual_obj_pos = height_points.gather(1,obj_pos_indices).view(self.num_envs,3)
+        self.cube_object_pos = self.virtual_obj_pos
+        for i in range(self.num_envs):
+            x = self.cube_object_pos[i, 0] 
+            y = self.cube_object_pos[i, 1] 
+            z = self.cube_object_pos[i, 2] 
+            sphere_pose = gymapi.Transform(gymapi.Vec3(x, y, z), r=None)
+            gymutil.draw_lines(sphere_geom, self.gym, self.viewer, self.envs[i], sphere_pose) 
+    
     def _init_height_points(self):
         """ Returns points at which the height measurments are sampled (in base frame)
 
@@ -1353,8 +1427,8 @@ class LeggedManipulatorRobot(BaseTask):
         return torch.sum(torch.square(self.dof_pos - self.default_dof_pos), dim=1)
     def _reward_object_distance(self) -> Tuple[Tensor, Tensor, Tensor]:
         """Reward for lifting the object off the table."""
-        #dis_err = torch.sum(torch.square(self._gripper_pos-self.cube_object_pos), dim=1)
-        dis_err = torch.sum(torch.square(self._gripper_pos-self.robot_root_states[:,0:3]+torch.tensor([0.5, 0.3, 0.4],device=self.device)), dim=1)
+        dis_err = torch.sum(torch.square(self._gripper_pos-self.cube_object_pos), dim=1)
+        #dis_err = torch.sum(torch.square(self._gripper_pos-self.robot_root_states[:,0:3]+torch.tensor([0.5, 0.3, 0.4],device=self.device)), dim=1)
         #print("_object_distance:",dis_err,"value:",torch.exp(-dis_err/self.cfg.rewards.object_sigma).shape)  #[0.7~3.5]
         return torch.exp(-dis_err/self.cfg.rewards.object_sigma)
     def _reward_orientation_quat(self):

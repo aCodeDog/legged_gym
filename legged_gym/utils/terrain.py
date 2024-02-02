@@ -115,7 +115,7 @@ class Terrain:
         slope = difficulty * 0.4
         step_height = 0.03 + 0.18 * difficulty
         discrete_obstacles_height = 0.03 + difficulty * 0.2
-        stepping_stones_size = 1.5 * (1.05 - difficulty)
+        stepping_stones_size = 1.0 * (1.05 - difficulty)
         stone_distance = 0.05 if difficulty==0 else 0.1
         gap_size = 1. * difficulty
         pit_depth = 1. * difficulty

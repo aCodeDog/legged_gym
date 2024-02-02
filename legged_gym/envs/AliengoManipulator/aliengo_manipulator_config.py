@@ -34,7 +34,7 @@ print(sys.path)
 from legged_gym.envs.base.legged_robot_manipulator_config import LeggedManipuatorRobotCfg, LeggedManipuatorRobotCfgPPO
 class AliengoManipulatorRoughCfg( LeggedManipuatorRobotCfg ):
     class env(LeggedManipuatorRobotCfg.env):
-        num_envs = 7
+        num_envs = 4096
         num_actions = 19
         num_observations = 265
     
@@ -46,8 +46,8 @@ class AliengoManipulatorRoughCfg( LeggedManipuatorRobotCfg ):
         heading_command = True # if true: compute ang vel command from heading error
         class ranges:
             lin_vel_x = [-1, 1] # min max [m/s]
-            lin_vel_y = [-0.5, 0.5]   # min max [m/s]
-            ang_vel_yaw = [0, 0]    # min max [rad/s]
+            lin_vel_y = [-1., 1.]   # min max [m/s]
+            ang_vel_yaw = [0.5, 0.5]    # min max [rad/s]
             heading = [0, 0]
             pos_x = [-5,5]
             pos_y = [-5,5]
@@ -83,16 +83,16 @@ class AliengoManipulatorRoughCfg( LeggedManipuatorRobotCfg ):
         }
     class rewards( LeggedManipuatorRobotCfg.rewards ):
         class scales( LeggedManipuatorRobotCfg.rewards.scales):
-            termination = -0.01
+            termination = -0.5
             tracking_lin_vel = 4
             tracking_ang_vel = 1
             lin_vel_z = -0.5
             ang_vel_xy = -0.05
             orientation = -1
-            torques = -0.0001
-            torques_rate = -0.0001
+            torques = -0.00001
+            torques_rate = -0.00001
             dof_vel = -2.5e-7
-            dof_acc = -2.5e-7
+            dof_acc = -2.5e-8
             base_height = -0.5
             feet_air_time =  1.0
             collision = -1.
@@ -100,8 +100,8 @@ class AliengoManipulatorRoughCfg( LeggedManipuatorRobotCfg ):
             action_rate = -0.0001
             stand_still = -0.05
             lifting =0.
-            object_distance = 6.
-            joint_pos = -0.3
+            object_distance = 2.
+            joint_pos = -0.05
 
 
         only_positive_rewards = True # if true negative total rewards are clipped at zero (avoids early termination problems)
@@ -128,12 +128,12 @@ class AliengoManipulatorRoughCfg( LeggedManipuatorRobotCfg ):
         file = '{LEGGED_GYM_ROOT_DIR}/resources/robots/aliengoZ1/urdf/aliengoZ1.urdf'
         name = "aliengoZ1"
         foot_name = "foot"
-        penalize_contacts_on = ["thigh", "calf","hip",]
-        terminate_after_contacts_on = ["base", "calf","hip","thigh"] #,"arm","hip","thigh", "calf" "RL_foot","RR_foot"
+        penalize_contacts_on = ["thigh", "calf","hip","base"]
+        terminate_after_contacts_on = ["base"] #,"arm","hip","thigh", "calf" "RL_foot","RR_foot"
         wheel_name =[] #wheel joints name
         arm_name = ["arm"]
         Gripper = ["Gripper"]
-        self_collisions = 1 # 1 to disable, 0 to enable...bitwise filter
+        self_collisions = 0 # 1 to disable, 0 to enable...bitwise filter
 
 class AliengoManipulatorRoughCfgPPO( LeggedManipuatorRobotCfgPPO ):
     seed =11 
@@ -141,10 +141,10 @@ class AliengoManipulatorRoughCfgPPO( LeggedManipuatorRobotCfgPPO ):
         entropy_coef = 0.01
     class runner( LeggedManipuatorRobotCfgPPO.runner ):
         run_name = ''
-        experiment_name = 'test'
+        experiment_name = 'aliengoManipulatorInit_0'
         #resume = True
         num_steps_per_env = 48 # per iteration
-        max_iterations = 1300
+        max_iterations = 3000
         #load_run="/home/g54/issac_gym/legged_gym/logs/aliengoManipulatorInit/Dec14_21-58-17_"
         #load_run = "/home/g54/issac_gym/legged_gym/logs/aliengoZ1/Dec06_14-48-41_" # -1 = last run
         #checkpoint = 2000 # -1 = last saved model
@@ -154,4 +154,4 @@ class AliengoManipulatorRoughCfgPPO( LeggedManipuatorRobotCfgPPO ):
         #experiment_name = '48machine'
         load_run = "/home/g54/issac_gym/legged_gym/logs/"+experiment_name
         #load_run = "/home/g54/issac_gym/legged_gym/logs/48machine"
-        checkpoint = 7300
+        checkpoint = 5000
